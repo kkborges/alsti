@@ -204,17 +204,13 @@ class CodeValidator:
         """Validate Python code."""
         python_path = self.language_paths.python or "python3"
 
-        if filename:
-            # Validate existing file
-            success, output = self._run_command([python_path, "-m", "py_compile", filename])
-        else:
-            # Validate code string
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-                f.write(code)
-                temp_file = f.name
+        # Always use temp file for validation (original file may not exist yet)
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(code)
+            temp_file = f.name
 
-            success, output = self._run_command([python_path, "-m", "py_compile", temp_file])
-            Path(temp_file).unlink()
+        success, output = self._run_command([python_path, "-m", "py_compile", temp_file])
+        Path(temp_file).unlink(missing_ok=True)
 
         return ValidationResult(success, None if success else output)
 
@@ -224,16 +220,14 @@ class CodeValidator:
         """Validate JavaScript code."""
         node_path = self.language_paths.node or "node"
 
-        if not filename:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".js", delete=False) as f:
-                f.write(code)
-                filename = f.name
+        # Always use temp file for validation
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".js", delete=False) as f:
+            f.write(code)
+            temp_file = f.name
 
         # Node will parse and report syntax errors
-        success, output = self._run_command([node_path, "--check", filename])
-
-        if not filename.startswith("/tmp"):
-            Path(filename).unlink(missing_ok=True)
+        success, output = self._run_command([node_path, "--check", temp_file])
+        Path(temp_file).unlink(missing_ok=True)
 
         return ValidationResult(success, None if success else output)
 
@@ -243,15 +237,13 @@ class CodeValidator:
         """Validate TypeScript code."""
         npx_path = self.language_paths.npx or "npx"
 
-        if not filename:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".ts", delete=False) as f:
-                f.write(code)
-                filename = f.name
+        # Always use temp file for validation
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".ts", delete=False) as f:
+            f.write(code)
+            temp_file = f.name
 
-        success, output = self._run_command([npx_path, "tsc", "--noEmit", filename])
-
-        if not filename.startswith("/tmp"):
-            Path(filename).unlink(missing_ok=True)
+        success, output = self._run_command([npx_path, "tsc", "--noEmit", temp_file])
+        Path(temp_file).unlink(missing_ok=True)
 
         return ValidationResult(success, None if success else output)
 
@@ -261,19 +253,17 @@ class CodeValidator:
         """Validate Java code."""
         javac_path = self.language_paths.javac or "javac"
 
-        if not filename:
-            # Extract class name from code
-            import re
-            match = re.search(r"public\s+class\s+(\w+)", code)
-            class_name = match.group(1) if match else "Main"
+        # Extract class name from code
+        import re
+        match = re.search(r"public\s+class\s+(\w+)", code)
+        class_name = match.group(1) if match else "Main"
 
-            with tempfile.TemporaryDirectory() as tmpdir:
-                filename = Path(tmpdir) / f"{class_name}.java"
-                filename.write_text(code)
+        # Always use temp directory for validation
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp_file = Path(tmpdir) / f"{class_name}.java"
+            temp_file.write_text(code)
 
-                success, output = self._run_command([javac_path, str(filename)])
-        else:
-            success, output = self._run_command([javac_path, filename])
+            success, output = self._run_command([javac_path, str(temp_file)])
 
         return ValidationResult(success, None if success else output)
 
@@ -283,10 +273,10 @@ class CodeValidator:
         """Validate C# code."""
         dotnet_path = self.language_paths.dotnet or "dotnet"
 
+        # Always use temp directory for validation
         with tempfile.TemporaryDirectory() as tmpdir:
-            if not filename:
-                filename = Path(tmpdir) / "Program.cs"
-                filename.write_text(code)
+            temp_file = Path(tmpdir) / "Program.cs"
+            temp_file.write_text(code)
 
             # Create a minimal project file
             csproj = Path(tmpdir) / "temp.csproj"
@@ -310,15 +300,13 @@ class CodeValidator:
         """Validate PHP code."""
         php_path = self.language_paths.php or "php"
 
-        if filename:
-            success, output = self._run_command([php_path, "-l", filename])
-        else:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".php", delete=False) as f:
-                f.write(code)
-                temp_file = f.name
+        # Always use temp file for validation
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".php", delete=False) as f:
+            f.write(code)
+            temp_file = f.name
 
-            success, output = self._run_command([php_path, "-l", temp_file])
-            Path(temp_file).unlink()
+        success, output = self._run_command([php_path, "-l", temp_file])
+        Path(temp_file).unlink(missing_ok=True)
 
         return ValidationResult(success, None if success else output)
 
@@ -328,12 +316,12 @@ class CodeValidator:
         """Validate Go code."""
         go_path = self.language_paths.go or "go"
 
+        # Always use temp directory for validation
         with tempfile.TemporaryDirectory() as tmpdir:
-            if not filename:
-                filename = Path(tmpdir) / "main.go"
-                filename.write_text(code)
+            temp_file = Path(tmpdir) / "main.go"
+            temp_file.write_text(code)
 
-            success, output = self._run_command([go_path, "build", str(filename)])
+            success, output = self._run_command([go_path, "build", str(temp_file)])
 
         return ValidationResult(success, None if success else output)
 
@@ -343,15 +331,13 @@ class CodeValidator:
         """Validate Rust code."""
         rustc_path = self.language_paths.rustc or "rustc"
 
-        if not filename:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".rs", delete=False) as f:
-                f.write(code)
-                filename = f.name
+        # Always use temp file for validation
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".rs", delete=False) as f:
+            f.write(code)
+            temp_file = f.name
 
-        success, output = self._run_command([rustc_path, "--crate-type", "lib", filename])
-
-        if not filename.startswith("/tmp"):
-            Path(filename).unlink(missing_ok=True)
+        success, output = self._run_command([rustc_path, "--crate-type", "lib", temp_file])
+        Path(temp_file).unlink(missing_ok=True)
 
         return ValidationResult(success, None if success else output)
 
@@ -361,14 +347,12 @@ class CodeValidator:
         """Validate Ruby code."""
         ruby_path = self.language_paths.ruby or "ruby"
 
-        if filename:
-            success, output = self._run_command([ruby_path, "-c", filename])
-        else:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".rb", delete=False) as f:
-                f.write(code)
-                temp_file = f.name
+        # Always use temp file for validation
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".rb", delete=False) as f:
+            f.write(code)
+            temp_file = f.name
 
-            success, output = self._run_command([ruby_path, "-c", temp_file])
-            Path(temp_file).unlink()
+        success, output = self._run_command([ruby_path, "-c", temp_file])
+        Path(temp_file).unlink(missing_ok=True)
 
         return ValidationResult(success, None if success else output)
