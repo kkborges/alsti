@@ -1,0 +1,27 @@
+{
+  "description": "Simple calculator application with basic arithmetic operations",
+  "language": "python",
+  "steps": [
+    {
+      "name": "Calculator Module",
+      "description": "Create a Python module with functions for basic arithmetic operations: add, subtract, multiply, divide. Include error handling for division by zero.",
+      "language": "python",
+      "filename": "calculator.py",
+      "dependencies": []
+    },
+    {
+      "name": "Calculator Tests",
+      "description": "Create pytest unit tests for the calculator module, testing all operations including edge cases like division by zero.",
+      "language": "python",
+      "filename": "test_calculator.py",
+      "dependencies": ["calculator.py"]
+    },
+    {
+      "name": "CLI Interface",
+      "description": "Create a command-line interface for the calculator using argparse or click. Allow users to specify operation and operands as command-line arguments.",
+      "language": "python",
+      "filename": "calculator_cli.py",
+      "dependencies": ["calculator.py"]
+    }
+  ]
+}

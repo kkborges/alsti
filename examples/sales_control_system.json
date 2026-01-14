@@ -1,0 +1,97 @@
+{
+  "description": "Web application for sales control system with supplier management, inventory control, product catalog, user roles (admin, cashier), sales tracking, and product categories/subcategories",
+  "language": "python",
+  "steps": [
+    {
+      "name": "Database Configuration",
+      "description": "Create a SQLAlchemy database configuration file with connection settings and base model setup. Include configuration for PostgreSQL or SQLite.",
+      "language": "python",
+      "filename": "database.py",
+      "dependencies": []
+    },
+    {
+      "name": "User Models",
+      "description": "Create SQLAlchemy models for User with roles (admin, cashier), including authentication fields (username, password hash, email) and timestamps.",
+      "language": "python",
+      "filename": "models/user.py",
+      "dependencies": ["database.py"]
+    },
+    {
+      "name": "Supplier Models",
+      "description": "Create SQLAlchemy models for Supplier with fields: name, contact_person, email, phone, address, and timestamps.",
+      "language": "python",
+      "filename": "models/supplier.py",
+      "dependencies": ["database.py"]
+    },
+    {
+      "name": "Category Models",
+      "description": "Create SQLAlchemy models for Category and Subcategory with hierarchical relationship. Include name, description, and timestamps.",
+      "language": "python",
+      "filename": "models/category.py",
+      "dependencies": ["database.py"]
+    },
+    {
+      "name": "Product Models",
+      "description": "Create SQLAlchemy models for Product with fields: name, description, sku, price, cost, category_id, subcategory_id, supplier_id, and timestamps. Include relationships to Category, Subcategory, and Supplier.",
+      "language": "python",
+      "filename": "models/product.py",
+      "dependencies": ["database.py", "models/supplier.py", "models/category.py"]
+    },
+    {
+      "name": "Inventory Models",
+      "description": "Create SQLAlchemy models for Inventory tracking with fields: product_id, quantity, minimum_stock, maximum_stock, location, last_restock_date. Include relationship to Product.",
+      "language": "python",
+      "filename": "models/inventory.py",
+      "dependencies": ["database.py", "models/product.py"]
+    },
+    {
+      "name": "Sales Models",
+      "description": "Create SQLAlchemy models for Sale and SaleItem. Sale should include: sale_date, total_amount, user_id (cashier), payment_method, status. SaleItem should include: sale_id, product_id, quantity, unit_price, subtotal. Include proper relationships.",
+      "language": "python",
+      "filename": "models/sale.py",
+      "dependencies": ["database.py", "models/user.py", "models/product.py"]
+    },
+    {
+      "name": "Authentication Service",
+      "description": "Create an authentication service with functions for: user registration, login (with password hashing using bcrypt), token generation (JWT), and role-based access control decorators.",
+      "language": "python",
+      "filename": "services/auth.py",
+      "dependencies": ["models/user.py"]
+    },
+    {
+      "name": "Product Service",
+      "description": "Create a service layer for Product CRUD operations: create, read, update, delete, search products by name/sku, filter by category/supplier, and list with pagination.",
+      "language": "python",
+      "filename": "services/product_service.py",
+      "dependencies": ["models/product.py", "models/inventory.py"]
+    },
+    {
+      "name": "Flask Application Setup",
+      "description": "Create the main Flask application with blueprint registration, CORS configuration, error handlers, and database initialization. Include configuration for development and production environments.",
+      "language": "python",
+      "filename": "app.py",
+      "dependencies": ["database.py", "services/auth.py"]
+    },
+    {
+      "name": "User API Routes",
+      "description": "Create Flask blueprint for user management API endpoints: POST /api/users/register, POST /api/users/login, GET /api/users/profile, PUT /api/users/profile, GET /api/users (admin only). Include request validation and error handling.",
+      "language": "python",
+      "filename": "routes/user_routes.py",
+      "dependencies": ["app.py", "models/user.py", "services/auth.py"]
+    },
+    {
+      "name": "Product API Routes",
+      "description": "Create Flask blueprint for product API endpoints: GET /api/products, POST /api/products, GET /api/products/<id>, PUT /api/products/<id>, DELETE /api/products/<id>. Include authentication, authorization (admin only for modifications), pagination, and search.",
+      "language": "python",
+      "filename": "routes/product_routes.py",
+      "dependencies": ["app.py", "services/product_service.py", "services/auth.py"]
+    },
+    {
+      "name": "Requirements File",
+      "description": "Create a requirements.txt file with all necessary Python dependencies: Flask, SQLAlchemy, Flask-CORS, PyJWT, bcrypt, python-dotenv, psycopg2-binary (for PostgreSQL), and any other required packages.",
+      "language": "python",
+      "filename": "requirements.txt",
+      "dependencies": []
+    }
+  ]
+}

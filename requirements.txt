@@ -1,0 +1,22 @@
+# Google Generative AI (Gemini)
+google-generativeai>=0.3.0
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# CLI and user interaction
+click>=8.1.0
+colorama>=0.4.6
+rich>=13.0.0
+
+# JSON and data handling
+pydantic>=2.0.0
+
+# Logging
+loguru>=0.7.0
+
+# HTTP requests
+requests>=2.31.0
+
+# Testing and validation
+pytest>=7.4.0

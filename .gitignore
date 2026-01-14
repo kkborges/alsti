@@ -31,3 +31,29 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Environment variables
+.env
+
+# Generated code
+generated/*
+!generated/.gitkeep
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Application logs
+gemini-code-generator.log
