@@ -88,7 +88,7 @@
     },
     {
       "name": "Requirements File",
-      "description": "Create a requirements.txt file with all necessary Python dependencies: Flask, SQLAlchemy, Flask-CORS, PyJWT, bcrypt, python-dotenv, psycopg2-binary (for PostgreSQL), and any other required packages.",
+      "description": "Create a requirements.txt file with all necessary Python dependencies WITHOUT VERSIONS: Flask, SQLAlchemy, Flask-CORS, PyJWT, bcrypt, python-dotenv, psycopg2-binary (for PostgreSQL), and any other required packages. List only package names, one per line, without version specifications.",
       "language": "python",
       "filename": "requirements.txt",
       "dependencies": []

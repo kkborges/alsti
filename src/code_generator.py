@@ -164,7 +164,7 @@ class CodeGenerator:
                 ) as progress:
                     progress.add_task(description="  Validating code...", total=None)
                     validation_result = self.validator.validate(
-                        code, step.language
+                        code, step.language, step.filename
                     )
 
                 if validation_result.success:

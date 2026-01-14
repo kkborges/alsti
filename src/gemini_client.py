@@ -103,7 +103,17 @@ class GeminiClient:
             "- Do not include ```language``` code blocks\n"
             "- Include necessary imports and dependencies\n"
             "- Add brief inline comments for complex logic\n"
-            "- Ensure the code is complete and can be executed/compiled immediately"
+            "- Ensure the code is complete and can be executed/compiled immediately\n"
+            "\n### Important - Dependencies:\n"
+            "- When creating dependency files (requirements.txt, package.json, Gemfile, etc.), "
+            "DO NOT specify versions\n"
+            "- Use package names only (e.g., 'flask' not 'flask==3.0.3')\n"
+            "- This ensures the latest stable versions are installed\n"
+            "- Examples:\n"
+            "  * Python: 'flask' instead of 'flask==3.0.3'\n"
+            "  * Node.js: '@typescript-eslint/parser' instead of '@typescript-eslint/parser@^5.0.0'\n"
+            "  * Ruby: 'rails' instead of 'rails (~> 7.0)'\n"
+            "  * PHP: 'symfony/console' instead of 'symfony/console:^6.0'"
         )
 
         return "\n".join(parts)

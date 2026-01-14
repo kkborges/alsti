@@ -43,6 +43,41 @@ class ValidationResult:
 class CodeValidator:
     """Validates code by compiling/running it."""
 
+    # Files that should skip validation (configuration/dependency files)
+    SKIP_VALIDATION_PATTERNS = [
+        'requirements.txt',
+        'package.json',
+        'package-lock.json',
+        'composer.json',
+        'composer.lock',
+        'Gemfile',
+        'Gemfile.lock',
+        'Cargo.toml',
+        'Cargo.lock',
+        'go.mod',
+        'go.sum',
+        'pom.xml',
+        'build.gradle',
+        'build.gradle.kts',
+        '.csproj',
+        '.sln',
+        '.env',
+        '.env.example',
+        '.gitignore',
+        'Dockerfile',
+        'docker-compose.yml',
+        'README.md',
+        '.md',  # All markdown files
+        '.txt',  # All text files (unless it's a specific language file)
+        '.json',  # JSON files (configuration)
+        '.yml',
+        '.yaml',
+        '.xml',
+        '.toml',
+        '.ini',
+        '.cfg',
+    ]
+
     def __init__(self, config: Config):
         """
         Initialize code validator.
@@ -52,6 +87,36 @@ class CodeValidator:
         """
         self.config = config
         self.language_paths = config.language_paths
+
+    def should_skip_validation(self, filename: str) -> bool:
+        """
+        Check if a file should skip validation (config/dependency files).
+
+        Args:
+            filename: Filename to check
+
+        Returns:
+            True if validation should be skipped
+        """
+        filename_lower = filename.lower()
+
+        # Get just the filename without path
+        from pathlib import Path
+        base_filename = Path(filename).name.lower()
+
+        for pattern in self.SKIP_VALIDATION_PATTERNS:
+            pattern_lower = pattern.lower()
+
+            if pattern_lower.startswith('.'):
+                # Extension pattern
+                if filename_lower.endswith(pattern_lower):
+                    return True
+            else:
+                # Check if pattern matches the base filename or is contained in full path
+                if base_filename == pattern_lower or pattern_lower in filename_lower:
+                    return True
+
+        return False
 
     def validate(
         self, code: str, language: Language, filename: Optional[str] = None
@@ -67,6 +132,11 @@ class CodeValidator:
         Returns:
             ValidationResult with success status and error message if any
         """
+        # Check if this file should skip validation
+        if filename and self.should_skip_validation(filename):
+            logger.info(f"Skipping validation for configuration file: {filename}")
+            return ValidationResult(True, None)
+
         logger.info(f"Validating {language} code...")
 
         try:
