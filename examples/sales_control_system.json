@@ -1,4 +1,5 @@
 {
+  "name": "sales_control_system",
   "description": "Web application for sales control system with supplier management, inventory control, product catalog, user roles (admin, cashier), sales tracking, and product categories/subcategories",
   "language": "python",
   "steps": [

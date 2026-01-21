@@ -178,11 +178,20 @@ Configure os paths para os compiladores/interpretadores:
 ## 🔄 Como Funciona
 
 1. **Planejamento**: Você define as etapas do projeto em um arquivo JSON
-2. **Geração**: O Gemini gera o código para cada etapa
-3. **Validação**: O código é compilado/executado para verificar erros
-4. **Correção**: Se houver erros, são enviados de volta ao Gemini
-5. **Iteração**: O processo se repete até o código estar válido ou atingir o limite de tentativas
-6. **Salvamento**: O código válido é salvo no diretório configurado
+2. **Criação da pasta**: Sistema cria uma subpasta em `generated/` para o projeto
+3. **Geração**: O Gemini gera o código para cada etapa
+4. **Validação**: O código é compilado/executado para verificar erros
+5. **Correção**: Se houver erros, são enviados de volta ao Gemini
+6. **Iteração**: O processo se repete até o código estar válido ou atingir o limite de tentativas
+7. **Salvamento**: O código válido é salvo em `generated/<project_name>/`
+
+### 🎯 Garantia de Conteúdo Específico por Arquivo
+
+O sistema instrui o Gemini a:
+- Gerar **APENAS** o código relevante para cada arquivo específico
+- **NÃO misturar** código de diferentes responsabilidades
+- Manter **separação de responsabilidades** (config, models, routes, etc.)
+- Cada arquivo deve ter uma **responsabilidade única e clara**
 
 ## 🛠️ Desenvolvimento
 
@@ -204,6 +213,7 @@ Configure os paths para os compiladores/interpretadores:
 
 ```json
 {
+  "name": "my_project",
   "description": "Descrição geral do projeto",
   "language": "python",
   "steps": [
@@ -220,14 +230,43 @@ Configure os paths para os compiladores/interpretadores:
 
 ### Campos:
 
+- **name** (opcional): Nome da pasta do projeto. Se não fornecido, usa o nome do arquivo JSON
+  - Exemplo: `"name": "calculator"` → código salvo em `generated/calculator/`
 - **description**: Descrição geral do projeto (contexto para o Gemini)
 - **language**: Linguagem padrão (pode ser sobrescrita por etapa)
 - **steps**: Array de etapas a executar em ordem
   - **name**: Nome da etapa (para display)
-  - **description**: Prompt detalhado para o Gemini
+  - **description**: Prompt detalhado para o Gemini (seja MUITO específico sobre o que deve ir neste arquivo)
   - **language**: Linguagem específica desta etapa
-  - **filename**: Nome/caminho do arquivo a ser gerado
+  - **filename**: Nome/caminho do arquivo a ser gerado (relativo à pasta do projeto)
   - **dependencies**: Arquivos de outras etapas (para contexto)
+
+### 📁 Organização dos Arquivos Gerados
+
+Cada projeto é salvo em sua própria subpasta dentro de `generated/`:
+
+```
+generated/
+├── calculator/          # Projeto da calculadora
+│   ├── calculator.py
+│   ├── test_calculator.py
+│   └── calculator_cli.py
+├── sales_control_system/  # Sistema de vendas
+│   ├── database.py
+│   ├── models/
+│   │   ├── user.py
+│   │   └── product.py
+│   ├── routes/
+│   │   └── user_routes.py
+│   └── app.py
+└── my_api/              # Outro projeto
+    └── api.py
+```
+
+**Importante**: O nome da pasta é determinado por:
+1. Campo `"name"` no JSON (se fornecido)
+2. Nome do arquivo JSON sem extensão (se `name` não fornecido)
+3. Slug gerado da descrição (como fallback)
 
 ## 🐛 Troubleshooting
 

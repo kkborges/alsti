@@ -51,12 +51,14 @@ def generate(project_file: str, description: str):
     Generate a project from a JSON specification file.
 
     PROJECT_FILE should be a JSON file containing:
+    - name: (Optional) Project folder name. If not provided, uses the JSON filename.
     - description: Overall project description
     - language: Default programming language
     - steps: Array of steps with name, description, language, filename, and dependencies
 
     Example:
     {
+        "name": "sales_system",
         "description": "Web application for sales control",
         "language": "python",
         "steps": [
@@ -69,6 +71,8 @@ def generate(project_file: str, description: str):
             }
         ]
     }
+
+    Generated files will be saved to: generated/<project_name>/
     """
     try:
         # Load configuration
@@ -87,6 +91,12 @@ def generate(project_file: str, description: str):
             console.print("[red]Error: No project description provided[/red]")
             sys.exit(1)
 
+        # Get project name (from JSON or filename)
+        project_name = project_spec.get("name")
+        if not project_name:
+            # Use filename without extension as project name
+            project_name = Path(project_file).stem
+
         # Parse steps
         steps = parse_steps(project_spec.get("steps", []))
         if not steps:
@@ -95,7 +105,7 @@ def generate(project_file: str, description: str):
 
         # Generate project
         generator = CodeGenerator(config)
-        results = generator.generate_project(project_description, steps)
+        results = generator.generate_project(project_description, steps, project_name)
 
         # Exit with error code if any step failed
         if any(not r.success for r in results):
@@ -156,9 +166,12 @@ def quick(description: str, language: str, filename: str):
             filename=filename,
         )
 
+        # Generate project name from filename (without extension)
+        project_name = Path(filename).stem
+
         # Generate
         generator = CodeGenerator(config)
-        results = generator.generate_project(description, [step])
+        results = generator.generate_project(description, [step], project_name)
 
         if not results[0].success:
             sys.exit(1)

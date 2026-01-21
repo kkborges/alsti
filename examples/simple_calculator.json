@@ -1,4 +1,5 @@
 {
+  "name": "calculator",
   "description": "Simple calculator application with basic arithmetic operations",
   "language": "python",
   "steps": [

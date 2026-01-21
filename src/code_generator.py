@@ -54,9 +54,10 @@ class CodeGenerator:
         self.gemini_client = GeminiClient(config)
         self.validator = CodeValidator(config)
         self.console = Console()
+        self.project_dir = None  # Will be set during project generation
 
     def generate_project(
-        self, project_description: str, steps: List[ProjectStep]
+        self, project_description: str, steps: List[ProjectStep], project_name: str = None
     ) -> List[GenerationResult]:
         """
         Generate a complete project by executing steps in order.
@@ -64,15 +65,29 @@ class CodeGenerator:
         Args:
             project_description: Overall project description
             steps: List of steps to execute
+            project_name: Name for the project folder (auto-generated if not provided)
 
         Returns:
             List of generation results
         """
+        # Generate project name if not provided
+        if not project_name:
+            import re
+            # Create slug from description (first 30 chars, lowercase, alphanumeric + underscore)
+            project_name = re.sub(r'[^a-z0-9_]', '_', project_description[:30].lower())
+            project_name = re.sub(r'_+', '_', project_name).strip('_')
+
+        # Create project directory
+        self.project_dir = self.config.generated_code_dir / project_name
+        self.project_dir.mkdir(parents=True, exist_ok=True)
+
         logger.info(f"Starting project generation: {project_description}")
+        logger.info(f"Project directory: {self.project_dir}")
         self.console.print(
             f"\n[bold blue]🚀 Starting project generation[/bold blue]"
         )
-        self.console.print(f"[dim]Project: {project_description}[/dim]\n")
+        self.console.print(f"[dim]Project: {project_description}[/dim]")
+        self.console.print(f"[dim]Output: {self.project_dir}[/dim]\n")
 
         results = []
         generated_code = {}  # Store generated code for context
@@ -232,10 +247,10 @@ class CodeGenerator:
         Save generated code to file.
 
         Args:
-            filename: Output filename
+            filename: Output filename (relative to project directory)
             code: Code content
         """
-        output_path = self.config.generated_code_dir / filename
+        output_path = self.project_dir / filename
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(code)
         logger.info(f"Saved code to {output_path}")
@@ -268,5 +283,5 @@ class CodeGenerator:
                         )
 
         self.console.print(
-            f"\n[dim]Generated files saved to: {self.config.generated_code_dir}[/dim]"
+            f"\n[dim]Generated files saved to: {self.project_dir}[/dim]"
         )
